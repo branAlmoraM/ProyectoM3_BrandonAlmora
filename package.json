@@ -1,0 +1,30 @@
+{
+  "name": "proyectom3_brandonalmora",
+  "version": "1.0.0",
+  "description": "SPA para chatear con Batman usando Gemini AI",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "test": "vitest",
+    "test:watch": "vitest --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/branAlmoraM/ProyectoM3_BrandonAlmora.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/branAlmoraM/ProyectoM3_BrandonAlmora/issues"
+  },
+  "homepage": "https://github.com/branAlmoraM/ProyectoM3_BrandonAlmora#readme",
+  "devDependencies": {
+    "vercel": "^54.21.1",
+    "vitest": "^4.1.10"
+  }
+}
