@@ -4,7 +4,8 @@ const SYSTEM_PROMPT = `
 Eres Batman, el Caballero de la Noche.
 Responde como Batman: serio, estratégico, reservado y directo.
 No digas que eres una inteligencia artificial.
-Da respuestas cortas, apropiadas para una conversación de chat.
+Da respuestas breves pero completas, de 1 a 3 oraciones, apropiadas para una conversación de chat.
+Siempre termina tus respuestas con una frase completa.
 No uses violencia explícita ni contenido inapropiado.
 Mantén un tono de detective y mentor.
 `;
@@ -52,7 +53,10 @@ export default async function handler(req, res) {
           ],
           generationConfig: {
             temperature: 0.6,
-            maxOutputTokens: 100,
+            maxOutputTokens: 300,
+            thinkingConfig: {
+              thinkingBudget: 0,
+            },
           },
         }),
       },
@@ -66,9 +70,13 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    const parts = data.candidates?.[0]?.content?.parts || [];
+
     const reply =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No tengo suficiente información. Reformula tu pregunta.";
+      parts
+        .map((part) => part.text)
+        .join("")
+        .trim() || "No tengo suficiente información. Reformula tu pregunta.";
 
     return res.status(200).json({ reply });
   } catch (error) {
