@@ -7,17 +7,35 @@ import {
 
 import { sendMessageToBatman } from "./services/gemini.js";
 
+let conversation = [];
+
 export function initChat() {
   const form = document.querySelector("#chat-form");
   const input = document.querySelector("#message-input");
-  const messages = document.querySelector("#messages");
-  const emptyChat = document.querySelector("#empty-chat");
+  const sendButton = document.querySelector("#send-button");
+  const clearButton = document.querySelector("#clear-chat");
+  const messagesContainer = document.querySelector("#messages");
   const typing = document.querySelector("#typing");
   const errorMessage = document.querySelector("#error-message");
 
-  if (!form || !input || !messages || !typing || !errorMessage) return;
+  if (
+    !form ||
+    !input ||
+    !sendButton ||
+    !clearButton ||
+    !messagesContainer ||
+    !typing ||
+    !errorMessage
+  ) {
+    return;
+  }
 
-  form.addEventListener("submit", async (event) => {
+  form.addEventListener("submit", handleSubmit);
+  clearButton.addEventListener("click", clearConversation);
+
+  input.focus();
+
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const userMessage = sanitizeText(input.value);
@@ -25,29 +43,69 @@ export function initChat() {
     if (!isValidMessage(userMessage)) return;
 
     addMessage("user", userMessage);
+    conversation.push({
+      role: "user",
+      text: userMessage,
+    });
+
     input.value = "";
-    emptyChat?.remove();
     showError("");
-    showTyping(true);
+    setLoading(true);
 
     try {
-      const batmanResponse = await sendMessageToBatman(userMessage);
+      const batmanResponse = await sendMessageToBatman(conversation);
+
       addMessage("batman", batmanResponse);
+
+      conversation.push({
+        role: "model",
+        text: batmanResponse,
+      });
     } catch (error) {
       showError("Batman no pudo responder. Intenta de nuevo.");
     } finally {
-      showTyping(false);
+      setLoading(false);
+      input.focus();
     }
-  });
-
-  function addMessage(sender, text) {
-    const message = createMessageElement(sender, text);
-    messages.appendChild(message);
-    scrollToBottom(messages);
   }
 
-  function showTyping(isVisible) {
-    typing.classList.toggle("hidden", !isVisible);
+  function addMessage(sender, text) {
+    removeEmptyState();
+
+    const message = createMessageElement(sender, text);
+
+    messagesContainer.appendChild(message);
+    scrollToBottom(messagesContainer);
+  }
+
+  function clearConversation() {
+    conversation = [];
+
+    messagesContainer.innerHTML = `
+      <div id="empty-chat" class="empty-chat">
+        <p>Comienza a chatear con Batman.</p>
+      </div>
+    `;
+
+    showError("");
+    setLoading(false);
+    input.value = "";
+    input.focus();
+  }
+
+  function removeEmptyState() {
+    const emptyChat = document.querySelector("#empty-chat");
+
+    if (emptyChat) {
+      emptyChat.remove();
+    }
+  }
+
+  function setLoading(isLoading) {
+    typing.classList.toggle("hidden", !isLoading);
+    input.disabled = isLoading;
+    sendButton.disabled = isLoading;
+    clearButton.disabled = isLoading;
   }
 
   function showError(message) {
