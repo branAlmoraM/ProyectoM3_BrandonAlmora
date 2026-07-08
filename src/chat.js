@@ -1,3 +1,10 @@
+import {
+  createMessageElement,
+  isValidMessage,
+  sanitizeText,
+  scrollToBottom,
+} from "./utils.js";
+
 const fakeBatmanResponses = [
   "He analizado la situación. Necesitamos actuar con estrategia.",
   "No basta con tener fuerza. La preparación lo es todo.",
@@ -12,54 +19,39 @@ export function initChat() {
   const emptyChat = document.querySelector("#empty-chat");
   const typing = document.querySelector("#typing");
 
-  if (!form || !input || !messages) return;
+  if (!form || !input || !messages || !typing) return;
 
-  form.addEventListener("submit", async (event) => {
+  form.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    const text = input.value.trim();
+    const userMessage = sanitizeText(input.value);
 
-    if (!text) return;
+    if (!isValidMessage(userMessage)) return;
 
-    addMessage("user", text);
+    addMessage("user", userMessage);
     input.value = "";
 
-    if (emptyChat) {
-      emptyChat.remove();
-    }
+    emptyChat?.remove();
 
     showTyping(true);
 
     setTimeout(() => {
-      const response = getFakeBatmanResponse();
-      addMessage("batman", response);
+      const batmanResponse = getFakeBatmanResponse();
+
+      addMessage("batman", batmanResponse);
       showTyping(false);
     }, 1200);
   });
 
   function addMessage(sender, text) {
-    const message = document.createElement("div");
+    const message = createMessageElement(sender, text);
 
-    message.classList.add("message");
-
-    if (sender === "user") {
-      message.classList.add("message-user");
-    } else {
-      message.classList.add("message-batman");
-    }
-
-    message.textContent = text;
     messages.appendChild(message);
-
-    scrollToBottom();
+    scrollToBottom(messages);
   }
 
   function showTyping(isVisible) {
     typing.classList.toggle("hidden", !isVisible);
-  }
-
-  function scrollToBottom() {
-    messages.scrollTop = messages.scrollHeight;
   }
 
   function getFakeBatmanResponse() {
