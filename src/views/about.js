@@ -15,10 +15,6 @@ export function AboutView() {
           disciplina, estrategia y tono reservado.
         </p>
 
-        <p>
-          Más adelante se integrará Google Gemini AI mediante Vercel Functions
-          para proteger la API key.
-        </p>
       </div>
     </section>
   `;
