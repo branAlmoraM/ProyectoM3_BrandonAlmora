@@ -18,11 +18,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { message } = req.body;
+    const { messages } = req.body;
 
-    if (!message || !message.trim()) {
+    if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({
-        error: "El mensaje es obligatorio",
+        error: "El historial de mensajes es obligatorio",
       });
     }
 
@@ -33,6 +33,11 @@ export default async function handler(req, res) {
         error: "Falta configurar GEMINI_API_KEY",
       });
     }
+
+    const contents = messages.map((message) => ({
+      role: message.role,
+      parts: [{ text: message.text }],
+    }));
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
@@ -45,12 +50,7 @@ export default async function handler(req, res) {
           systemInstruction: {
             parts: [{ text: SYSTEM_PROMPT }],
           },
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: message }],
-            },
-          ],
+          contents,
           generationConfig: {
             temperature: 0.6,
             maxOutputTokens: 300,
