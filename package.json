@@ -26,5 +26,8 @@
   "devDependencies": {
     "vercel": "^54.21.1",
     "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1"
   }
 }
